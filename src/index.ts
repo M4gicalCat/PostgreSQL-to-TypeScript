@@ -8,7 +8,8 @@ export async function main(connectionString: string, givenSchemas: string[] = []
   const tables = await db.findTables(givenSchemas)
 
   const schemas: Record<string, { types: (typeof types)[string]; tables: (typeof tables)[string] }> = {}
-  for (const schema in types) {
+  const schemasNames = new Set<string>([...Object.keys(types), ...Object.keys(tables)])
+  for (const schema of schemasNames) {
     schemas[schema] = { types: types[schema], tables: tables[schema] ?? [] }
   }
   let out = `export namespace Db {
@@ -16,9 +17,11 @@ export async function main(connectionString: string, givenSchemas: string[] = []
 `
 
   for (const [schema, { types, tables }] of Object.entries(schemas)) {
+    // don't write definition for psql schemas
+    if (['pg_catalog', 'information_schema'].includes(schema)) continue
     out += `  export namespace ${toCamelCase(schema)} {
 `
-    for (const [name, { desc, values }] of Object.entries(types)) {
+    for (const [name, { desc, values }] of Object.entries(types ?? {})) {
       // set `∕` instead of `/` to prevent closing the comment
       if (desc) {
         out += `    /** ${sanitizeComment(desc)} */
@@ -28,7 +31,7 @@ export async function main(connectionString: string, givenSchemas: string[] = []
 `
     }
 
-    for (const [name, { columns, desc }] of Object.entries(tables)) {
+    for (const [name, { columns, desc }] of Object.entries(tables ?? {})) {
       if (desc) {
         out += `    /** ${sanitizeComment(desc)} */
 `

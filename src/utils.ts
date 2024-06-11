@@ -53,6 +53,7 @@ function getPsqlType(type: string) {
     case '_citext':
     case '_uuid':
     case '_bytea':
+    case '_char':
       return 'string[]'
     case '_json':
     case '_jsonb':
@@ -69,10 +70,11 @@ export function getType(
   column: { type: string; schema: string; nullable: boolean },
   schemas: Record<string, { types: Record<string, unknown>; tables: Record<string, unknown> }>
 ) {
-  let type: string
+  let type: string = 'unknown'
   if (column.schema === 'pg_catalog') {
     type = getPsqlType(column.type)
-  } else {
+  }
+  if (type === 'unknown') {
     type = schemas[column.schema]?.types?.[column.type]
       ? `${toCamelCase(column.schema)}.${column.type}`
       : schemas[column.schema]?.tables?.[column.type]
