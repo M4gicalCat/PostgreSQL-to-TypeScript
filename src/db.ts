@@ -32,27 +32,31 @@ class Db {
   public async findTables(filterSchemas: string[]) {
     type T = {
       name: string
-      columns: { name: string; type: string; schema: string; nullable: boolean }[]
+      columns: { name: string; type: string; schema: string; nullable: boolean; desc?: string }[]
       schema: string
       desc?: string
     }
     const schemas: Record<string, Record<string, Pick<T, 'columns' | 'desc'>>> = {}
     await this.db.each<T>(
-      `    
-          SELECT table_name   as name,
-                 table_schema as schema,
-                 json_agg(json_build_object(
-                         'name', column_name,
-                         'type', udt_name,
-                         'schema', udt_schema,
-                         'nullable', is_nullable = 'YES',
-                          )) as columns,
+      `SELECT
+                c.table_name as name,
+                c.table_schema as schema,
+                json_agg(json_build_object(
+                        'name', c.column_name,
+                        'type', c.udt_name,
+                        'schema', c.udt_schema,
+                        'nullable', c.is_nullable = 'YES',
+                         'desc', pgd.description
+                         )) as columns,
                 obj_description((table_schema || '.' || table_name)::regclass) as "desc"
-          FROM information_schema.columns
-          WHERE $[schemas] IS NULL
-             OR table_schema = ANY ($[schemas])
-          GROUP BY table_schema, table_name
-      `,
+            FROM pg_catalog.pg_statio_all_tables AS st
+            LEFT JOIN pg_catalog.pg_description pgd ON (pgd.objoid=st.relid)
+            RIGHT JOIN information_schema.columns c ON (
+                pgd.objsubid=c.ordinal_position AND
+                c.table_schema=st.schemaname AND
+                c.table_name=st.relname            
+            )
+            GROUP BY table_schema, table_name`,
       { schemas: filterSchemas.length > 0 ? filterSchemas : null },
       (item: T) => {
         schemas[item.schema] ??= {}

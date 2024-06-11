@@ -84,3 +84,7 @@ export function getType(
   if (type === 'unknown') console.warn(`[UNKNOWN] - ${column.schema}.${column.type}`)
   return column.nullable ? `${type} | null` : type
 }
+
+export function sanitizeComment(comment?: string) {
+  return (comment ?? '').replace(/\//g, '∕')
+}

@@ -1,5 +1,5 @@
 import Db from './db'
-import { getType, toCamelCase } from './utils'
+import { getType, sanitizeComment, toCamelCase } from './utils'
 
 export async function main(connectionString: string, givenSchemas: string[] = []): Promise<string> {
   const db = new Db(connectionString)
@@ -21,7 +21,7 @@ export async function main(connectionString: string, givenSchemas: string[] = []
     for (const [name, { desc, values }] of Object.entries(types)) {
       // set `∕` instead of `/` to prevent closing the comment
       if (desc) {
-        out += `    /** ${desc.replace(/\//g, '∕')} */
+        out += `    /** ${sanitizeComment(desc)} */
 `
       }
       out += `    export type ${name} = ${values.map((v) => `'${v}'`).join(' | ')}
@@ -30,12 +30,16 @@ export async function main(connectionString: string, givenSchemas: string[] = []
 
     for (const [name, { columns, desc }] of Object.entries(tables)) {
       if (desc) {
-        out += `    /** ${desc.replace(/\//g, '∕')} */
+        out += `    /** ${sanitizeComment(desc)} */
 `
       }
       out += `    export interface ${toCamelCase(name)} {
 `
       for (const col of columns) {
+        if (col.desc) {
+          out += `      /** ${sanitizeComment(col.desc)} */
+`
+        }
         out += `      ${col.name}: ${getType(col, schemas)},
 `
       }
