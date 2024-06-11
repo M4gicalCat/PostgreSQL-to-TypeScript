@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "esnext",
+    "lib": ["es2015", "dom"],
+    "noImplicitAny": true,
+    "declaration": true,
+    "strictNullChecks": true,
+    "sourceMap": true,
+    "types": ["jest", "node"],
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "strict": true
+  },
+  "include": ["src/**/*.ts"]
+}
