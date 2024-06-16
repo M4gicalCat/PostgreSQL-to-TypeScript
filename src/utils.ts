@@ -1,4 +1,5 @@
 import { FKey } from './types'
+import Db from './db'
 
 export function toCamelCase(str: string) {
   return str
@@ -73,11 +74,18 @@ function getFkeyType(k: FKey) {
 }
 
 export function getType(
-  column: { type: string; schema: string; nullable: boolean },
+  column: { type: string; schema: string; nullable: boolean; desc?: string },
   schemas: Record<string, { types: Record<string, unknown>; tables: Record<string, unknown> }>,
   fKey?: FKey
 ) {
   if (fKey) return getFkeyType(fKey)
+  if (column.desc) {
+    const [, custom] = /@custom \{([^}]+)}/.exec(column.desc) ?? []
+    if (custom) {
+      const type = `${toCamelCase(Db.TYPES_SCHEMA)}.${custom}`
+      return column.nullable ? `${type} | null` : type
+    }
+  }
   let type: string = 'unknown'
   if (column.schema === 'pg_catalog') {
     type = getPsqlType(column.type)

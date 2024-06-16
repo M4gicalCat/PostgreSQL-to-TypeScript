@@ -3,7 +3,8 @@ import { FKey } from './types'
 class Db {
   private db
   private _schemas: string[] = []
-
+  public static readonly TYPES_SCHEMA = 'psql_to_ts'
+  public static readonly TYPES_TABLE = 'custom'
   constructor(conn: string) {
     this.db = pgp({})(conn)
   }
@@ -29,6 +30,27 @@ class Db {
       }
     )
     return schemas
+  }
+
+  public async init() {
+    return this.db.task(async (t) => {
+      await t.none(`CREATE SCHEMA $[schema~];`, { schema: Db.TYPES_SCHEMA }).catch(() => {})
+      await this.db.none(
+        `
+        CREATE TABLE IF NOT EXISTS $[schema~].$[table~] (
+          name varchar(255) NOT NULL PRIMARY KEY,
+          value text not null
+        );
+    `,
+        { schema: Db.TYPES_SCHEMA, table: Db.TYPES_TABLE }
+      )
+    })
+  }
+
+  public async findCustoms() {
+    return this.db
+      .any<{ name: string; value: string }>(`SELECT * FROM ${Db.TYPES_SCHEMA}.${Db.TYPES_TABLE}`)
+      .catch((e) => [])
   }
 
   public async findTables() {
