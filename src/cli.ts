@@ -9,6 +9,7 @@ import Db from './db'
 const argv = yargs(hideBin(process.argv))
   .usage('Usage: $0 [options]')
   .example('$0 -c postgres://username:password@localhost/db -o output.ts', 'generate typescript interfaces from schema')
+  .example('$0 -c postgres://username:password@localhost/db -i', 'create the schema and table to create custom types')
   .options({
     conn: {
       alias: 'c',
