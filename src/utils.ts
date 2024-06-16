@@ -1,3 +1,5 @@
+import { FKey } from './types'
+
 export function toCamelCase(str: string) {
   return str
     .split('_')
@@ -66,10 +68,16 @@ function getPsqlType(type: string) {
   }
 }
 
+function getFkeyType(k: FKey) {
+  return `${toCamelCase(k.schema)}.${toCamelCase(k.table)}['${k.column}']`
+}
+
 export function getType(
   column: { type: string; schema: string; nullable: boolean },
-  schemas: Record<string, { types: Record<string, unknown>; tables: Record<string, unknown> }>
+  schemas: Record<string, { types: Record<string, unknown>; tables: Record<string, unknown> }>,
+  fKey?: FKey
 ) {
+  if (fKey) return getFkeyType(fKey)
   let type: string = 'unknown'
   if (column.schema === 'pg_catalog') {
     type = getPsqlType(column.type)

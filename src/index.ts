@@ -3,9 +3,11 @@ import { getType, sanitizeComment, toCamelCase } from './utils'
 
 export async function main(connectionString: string, givenSchemas: string[] = []): Promise<string> {
   const db = new Db(connectionString)
+  db.schemas = givenSchemas
 
-  const types = await db.findTypes(givenSchemas)
-  const tables = await db.findTables(givenSchemas)
+  const types = await db.findTypes()
+  const tables = await db.findTables()
+  const fKeys = await db.findFKeys()
 
   const schemas: Record<string, { types: (typeof types)[string]; tables: (typeof tables)[string] }> = {}
   const schemasNames = new Set<string>([...Object.keys(types), ...Object.keys(tables)])
@@ -39,11 +41,16 @@ export async function main(connectionString: string, givenSchemas: string[] = []
       out += `    export interface ${toCamelCase(name)} {
 `
       for (const col of columns) {
+        const fKey = fKeys[schema]?.[name]?.[col.name]
         if (col.desc) {
           out += `      /** ${sanitizeComment(col.desc)} */
 `
         }
-        out += `      ${col.name}: ${getType(col, schemas)},
+        if (fKey) {
+          out += `      // foreign key \`${fKey.constraint}\`
+`
+        }
+        out += `      ${col.name}: ${getType(col, schemas, fKey)},
 `
       }
       out += `    }
