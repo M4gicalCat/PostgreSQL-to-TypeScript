@@ -2,6 +2,15 @@
 
 This lib lets you export your psql database to a TypeScript namespace.
 
+## Installation
+
+```shell
+# install dependencies
+npm i
+# compilation
+tsc
+```
+
 ## Usage
 
 ```shell
