@@ -35,28 +35,12 @@ export namespace Db {
 ```
 
 ## Custom types
-Once you ran the init script:
-```shell
-dist/cli.js -c [connection string] -i
-```
-You have access to a new schema `psql_to_ts`, and a table `custom`:
 
-Insert custom types in this table:
+You can set custom types for a JSON column :
 ```postgresql
-INSERT INTO psql_to_ts.custom (name, value) VALUES (
-  'myCustomType',
-  '{prop: string}'
-);
-```
-and reference them with comments on columns:
-```postgresql
-COMMENT ON COLUMN my_schema.my_table.my_column IS '@custom {myCustomType}';
+COMMENT ON COLUMN my_schema.my_table.my_column IS '@custom {customProp: string}';
 ```
 
-You can reference other custom types:
-```postgresql
-INSERT INTO psql_to_ts.custom (name, value) VALUES (
-  'mySecondType',
-  '{prop: string; custom: myCustomType}'
-);
-```
+Everything after `@custom ` is used as a type, so make sure you type a correct typescript value
+
+It is not advised, but you can also reference other types, using: `@custom Db.MySchema.MyTable['MyColumn']`.

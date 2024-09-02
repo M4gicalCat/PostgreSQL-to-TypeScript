@@ -48,8 +48,9 @@ export async function main(connectionString: string, givenSchemas: string[] = []
 `
     for (const [name, { desc, values }] of Object.entries(types ?? {})) {
       // set `∕` instead of `/` to prevent closing the comment
-      if (desc) {
-        out += `    /** ${sanitizeComment(desc)} */
+      const sanitized = sanitizeComment(desc)
+      if (sanitized.length) {
+        out += `    /** ${sanitized} */
 `
       }
       out += `    export type ${name} = ${values.map((v) => `'${v}'`).join(' | ')}
@@ -57,16 +58,18 @@ export async function main(connectionString: string, givenSchemas: string[] = []
     }
 
     for (const [name, { columns, desc }] of Object.entries(tables ?? {})) {
-      if (desc) {
-        out += `    /** ${sanitizeComment(desc)} */
+      const sanitized = sanitizeComment(desc)
+      if (sanitized.length) {
+        out += `    /** ${sanitized} */
 `
       }
       out += `    export interface ${toCamelCase(name)} {
 `
       for (const col of columns) {
         const fKey = fKeys[schema]?.[name]?.[col.name]
-        if (col.desc) {
-          out += `      /** ${sanitizeComment(col.desc)} */
+        const sanitized = sanitizeComment(desc)
+        if (sanitized.length) {
+          out += `      /** ${sanitized} */
 `
         }
         if (fKey) {

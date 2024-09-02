@@ -80,10 +80,9 @@ export function getType(
 ) {
   if (fKey) return getFkeyType(fKey)
   if (column.desc) {
-    const [, custom] = /@custom \{([^}]+)}/.exec(column.desc) ?? []
-    if (custom) {
-      const type = `${toCamelCase(Db.TYPES_SCHEMA)}.${custom}`
-      return column.nullable ? `${type} | null` : type
+    const [, ...custom] = column.desc.split('@custom ') ?? []
+    if (custom.length) {
+      return custom.join('@custom ')
     }
   }
   let type: string = 'unknown'
@@ -104,5 +103,5 @@ export function getType(
 }
 
 export function sanitizeComment(comment?: string) {
-  return (comment ?? '').replace(/\//g, '∕')
+  return (comment ?? '').split('@custom ')[0].replace(/\//g, '∕').trim()
 }
