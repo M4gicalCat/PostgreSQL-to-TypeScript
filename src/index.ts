@@ -53,7 +53,9 @@ export async function main(connectionString: string, givenSchemas: string[] = []
         out += `    /** ${sanitized} */
 `
       }
-      out += `    export type ${name} = ${values.map((v) => `'${v}'`).join(' | ')}
+      out += `    export enum ${name} {
+${values.map((v) => `      ${v.toUpperCase().replace(/ /g, '_')} = '${v}'`).join(',\n')}
+    }
 `
     }
 

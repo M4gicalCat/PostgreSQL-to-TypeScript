@@ -1,5 +1,4 @@
 import { FKey } from './types'
-import Db from './db'
 
 export function toCamelCase(str: string) {
   return str
@@ -39,7 +38,6 @@ function getPsqlType(type: string) {
       return 'boolean'
     case 'json':
     case 'jsonb':
-      //todo
       return 'Db.Json'
     case '_int2':
     case '_int4':

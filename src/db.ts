@@ -50,7 +50,7 @@ class Db {
   public async findCustoms() {
     return this.db
       .any<{ name: string; value: string }>(`SELECT * FROM ${Db.TYPES_SCHEMA}.${Db.TYPES_TABLE}`)
-      .catch((e) => [])
+      .catch((_e) => [])
   }
 
   public async findTables() {
