@@ -14,5 +14,24 @@
     "prettier": "^3.3.2",
     "tsc": "^2.0.4",
     "typescript": "^5.4.5"
-  }
+  },
+  "name": "@plifip/postgresql-to-typescript",
+  "description": "Generates TypeScript types from a PostgreSQL database",
+  "main": "cli.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/M4gicalCat/PostgreSQL-to-TypeScript.git"
+  },
+  "keywords": [
+    "psql",
+    "PostgreSQL",
+    "TS",
+    "TypeScript"
+  ],
+  "author": "plifip",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/M4gicalCat/PostgreSQL-to-TypeScript/issues"
+  },
+  "homepage": "https://github.com/M4gicalCat/PostgreSQL-to-TypeScript#readme"
 }
